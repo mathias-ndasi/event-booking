@@ -1,0 +1,37 @@
+datasource db {
+    provider = "mysql"
+    url      = env("DATABASE_URL")
+}
+
+generator db {
+    provider = "go run github.com/steebchen/prisma-client-go"
+}
+
+model Customer {
+    id           Int    @id @default(autoincrement())
+    emailAddress String @unique @map("email_address") @db.VarChar(255)
+    passwordHash     String @map("password_hash") @db.VarChar(255)
+
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    events Event[]
+
+    @@map("customer")
+}
+
+model Event {
+    id          Int      @id @default(autoincrement())
+    name        String   @map("name") @db.VarChar(255)
+    description String   @map("description") @db.VarChar(255)
+    location    String?  @map("location") @db.VarChar(255)
+    customerId  Int      @map("customer_id")
+    eventDate   DateTime @map("event_date")
+
+    createdAt   DateTime @default(now()) @map("created_at")
+    updatedAt   DateTime @updatedAt @map("updated_at")
+
+    customer Customer @relation(fields: [customerId], references: [id])
+
+    @@map("event")
+}
