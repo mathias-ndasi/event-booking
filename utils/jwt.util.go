@@ -2,7 +2,6 @@ package utils
 
 import (
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -11,7 +10,6 @@ import (
 )
 
 func GenerateToken(emailAddress string, customerId int64) (string, error) {
-	fmt.Println("Customer Id: ", customerId)
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"emailAddress": emailAddress,
 		"customerId":   customerId,

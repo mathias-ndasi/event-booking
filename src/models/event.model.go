@@ -22,8 +22,6 @@ type Event struct {
 
 func SaveEvent(authenticatedCustomerId int64, dto *dtos.CreateEventDto) (*db.EventModel, error) {
 	// create an event
-	fmt.Println(authenticatedCustomerId)
-	fmt.Printf("%T", authenticatedCustomerId)
 	prismaClient, context := prisma.GetClient()
 
 	createdEvent, error := prismaClient.Event.CreateOne(
