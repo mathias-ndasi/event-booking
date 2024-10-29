@@ -10,12 +10,14 @@ generator db {
 model Customer {
     id           Int    @id @default(autoincrement())
     emailAddress String @unique @map("email_address") @db.VarChar(255)
-    passwordHash     String @map("password_hash") @db.VarChar(255)
+    passwordHash String @map("password_hash") @db.VarChar(255)
 
     createdAt DateTime @default(now()) @map("created_at")
     updatedAt DateTime @updatedAt @map("updated_at")
 
-    events Event[]
+    events              Event[]
+    registrations       Registration[]
+    registrationHistory RegistrationHistory[]
 
     @@map("customer")
 }
@@ -28,10 +30,51 @@ model Event {
     customerId  Int      @map("customer_id")
     eventDate   DateTime @map("event_date")
 
-    createdAt   DateTime @default(now()) @map("created_at")
-    updatedAt   DateTime @updatedAt @map("updated_at")
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
 
-    customer Customer @relation(fields: [customerId], references: [id])
+    customer      Customer       @relation(fields: [customerId], references: [id])
+    registrations Registration[]
 
     @@map("event")
+}
+
+enum RegistrationStatus {
+    active
+    inactive
+}
+
+model Registration {
+    id         Int                @id @default(autoincrement()) @map("id")
+    eventId    Int                @map("event_id")
+    customerId Int                @map("customer_id")
+    status     RegistrationStatus @map("status")
+
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    event    Event    @relation(fields: [eventId], references: [id])
+    customer Customer @relation(fields: [customerId], references: [id])
+
+    history RegistrationHistory[]
+
+    @@map("registration")
+}
+
+model RegistrationHistory {
+    id             Int                @id @default(autoincrement()) @map("id")
+    registrationId Int                @map("registration_id")
+    startDate      DateTime           @default(now()) @map("start_date")
+    endDate        DateTime?          @map("end_date")
+    data           Json?              @map("data")
+    status         RegistrationStatus @map("status")
+    updatedBy      Int                @map("updated_by")
+
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    registration Registration @relation(fields: [registrationId], references: [id])
+    updateDoneBy Customer     @relation(fields: [updatedBy], references: [id])
+
+    @@map("registration_history")
 }

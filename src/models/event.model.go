@@ -32,16 +32,16 @@ func SaveEvent(authenticatedCustomerId int64, dto *dtos.CreateEventDto) (*db.Eve
 			db.Customer.ID.Equals(int(authenticatedCustomerId)),
 		),
 		db.Event.Location.Set(dto.Location),
-		db.Event.CustomerID.Set(int(authenticatedCustomerId)),
 	).Exec(context)
 	if error != nil {
-		return nil, error
+		panic(error)
+		// return nil, error
 	}
 
 	return createdEvent, nil
 }
 
-func GetAllEvents() ([]db.EventModel, error) {
+func GetAllEvents() (*[]db.EventModel, error) {
 	prismaClient, context := prisma.GetClient()
 
 	events, error := prismaClient.Event.FindMany().Exec(context)
@@ -49,7 +49,7 @@ func GetAllEvents() ([]db.EventModel, error) {
 		return nil, error
 	}
 
-	return events, nil
+	return &events, nil
 }
 
 func GetEvent(eventId int64) (*db.EventModel, error) {

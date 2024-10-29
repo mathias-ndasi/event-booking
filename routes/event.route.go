@@ -9,22 +9,9 @@ import (
 
 	"example.com/event-booking/src/dtos"
 	"example.com/event-booking/src/models"
-	"example.com/event-booking/utils"
 )
 
 func getEvents(context *gin.Context) {
-	token := context.Request.Header.Get("Authorization")
-	if token == "" {
-		context.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized request"})
-		return
-	}
-
-	_, error := utils.VerifyToken(token)
-	if error != nil {
-		context.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized request"})
-		return
-	}
-
 	events, error := models.GetAllEvents()
 	if error != nil {
 		log.Printf("Error occurred while retrieving events: %v", error)
@@ -71,34 +58,16 @@ func deleteEvent(context *gin.Context) {
 }
 
 func createEvent(context *gin.Context) {
-	token := context.Request.Header.Get("Authorization")
-	if token == "" {
-		context.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized request"})
-		return
-	}
-
-	customerId, error := utils.VerifyToken(token)
-	if error != nil {
-		context.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized request"})
-		return
-	}
-
 	var eventDto dtos.CreateEventDto
-	// validationModel := validate.Struct(eventDto)
-	// isDtoValid := validationModel.Validate()
 
-	// if !isDtoValid {
-	// 	context.JSON(http.StatusBadRequest, gin.H{"message": validationModel.Errors.One()})
-	// 	return
-	// }
-
-	error = context.ShouldBindJSON(&eventDto)
+	error := context.ShouldBindJSON(&eventDto)
 	if error != nil {
-		log.Printf("Error occurred while creating event: %v", error)
+		log.Printf("Error occurred while binding JSON input: %v", error)
 		context.JSON(http.StatusBadRequest, gin.H{"message": "Could not create event due to client request error"})
 		return
 	}
 
+	customerId := context.GetInt64("customerId")
 	eventModel, error := models.SaveEvent(customerId, &eventDto)
 	if error != nil {
 		log.Printf("Error occurred while creating event: %v", error)
